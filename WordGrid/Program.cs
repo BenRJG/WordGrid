@@ -11,42 +11,53 @@ namespace WordGrid
             while (true)
             {
                 Console.WriteLine("");
-                Console.WriteLine("Enter String");
+                Console.WriteLine("Enter grid size and available word grid characters");
                 string input = Console.ReadLine().Trim().ToLower();
 
                 List<string> inputParts = input.Split(' ').ToList();
 
-                int gridSize = 0;
-                bool successfull = int.TryParse(inputParts[0], out gridSize);
-                if (successfull)
+                if (inputParts.Count == 2)
                 {
-                    Console.WriteLine("Grid size is: {0} x {0}", gridSize);
-                    Console.WriteLine("Available characters are: {0}", inputParts[1]);
-                    CreateGrid wordGrid = new CreateGrid(gridSize, inputParts[1]);
-                    try
+                    int gridSize = 0;
+                    bool successfull = int.TryParse(inputParts[0], out gridSize);
+                    if (successfull)
                     {
-                        wordGrid.GenerateGrid();
-
-                        TimeSpan time = wordGrid.GetTimeCompleted();
-                        Console.WriteLine("Grid found in {0}:{1}:{2}", time.Minutes, time.Seconds, time.Milliseconds);
-                        Console.ForegroundColor = ConsoleColor.Green;
-                        foreach (string word in wordGrid.GetWordGrid())
+                        Console.WriteLine("Grid size is: {0} x {0}", gridSize);
+                        Console.WriteLine("Available characters are: {0}", inputParts[1]);
+                        CreateGrid wordGrid = new CreateGrid(gridSize, inputParts[1]);
+                        try
                         {
-                            Console.WriteLine(word);
+                            wordGrid.GenerateGrid();
+
+                            TimeSpan time = wordGrid.GetTimeCompleted();
+                            Console.WriteLine("Grid found in {0}:{1}:{2}", time.Minutes, time.Seconds, time.Milliseconds);
+                            Console.ForegroundColor = ConsoleColor.Green;
+                            foreach (string word in wordGrid.GetWordGrid())
+                            {
+                                Console.WriteLine(word);
+                            }
+                            Console.ForegroundColor = ConsoleColor.White;
                         }
-                        Console.ForegroundColor = ConsoleColor.White;
+                        catch (GridNotFoundException ex)
+                        {
+                            Console.ForegroundColor = ConsoleColor.Red;
+                            Console.WriteLine("EXCEPTION: {0}", ex.Message);
+                            Console.ForegroundColor = ConsoleColor.White;
+                        }
                     }
-                    catch(GridNotFoundException ex)
+                    else
                     {
-                        Console.ForegroundColor = ConsoleColor.Red;
-                        Console.WriteLine("EXCEPTION: {0}", ex.Message);
-                        Console.ForegroundColor = ConsoleColor.White;
+                        Console.Clear();
+                        Console.WriteLine("Invalid grid size value entered \"{0}\"", inputParts[1]);
                     }
                 }
                 else
                 {
-                    Console.WriteLine("Invalid grid size value entered {0}", inputParts[1]);
+                    Console.Clear();
+                    Console.WriteLine("\"{0}\" is an invalid format, please enter the grid size followed by available characters\n" +
+                                      "Example: 4 eeeeddoonnnsssrv", input);
                 }
+
             }
         }
     }
