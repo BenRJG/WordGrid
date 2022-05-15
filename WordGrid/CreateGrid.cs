@@ -4,13 +4,14 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Diagnostics;
+using System.Net;
 
 namespace WordGrid
 {
     class CreateGrid
     {
         #region Variables
-        private static string FILEPATH = "../../../enable1.txt";
+        private static string FILEPATH = "https://norvig.com/ngrams/enable1.txt";
 
         private int _gridSize;
         private string _characters;
@@ -32,23 +33,30 @@ namespace WordGrid
         #region public members
         public void GenerateGrid()
         {
-            ConsoleColor defaultColor = Console.ForegroundColor;
             Console.ForegroundColor = ConsoleColor.DarkYellow;
 
             //Extract valid words from word list
             Console.WriteLine("Extracting valid words from {0}", FILEPATH);
             int total = 0;
-            foreach (string line in File.ReadLines(@FILEPATH, Encoding.UTF8))
+            WebClient client = new WebClient();
+            StreamReader reader = new StreamReader(client.OpenRead(FILEPATH));
+
+            string readerLine;
+            readerLine = reader.ReadLine();
+
+            while (readerLine != null)
             {
-                if (line.Length == _gridSize)
+                if (readerLine.Length == _gridSize)
                 {
-                    if (IsValid(line, _characters))
+                    if (IsValid(readerLine, _characters))
                     {
-                        _wordList.Add(line);
+                        _wordList.Add(readerLine);
                     }
                 }
                 total++;
+                readerLine = reader.ReadLine();
             }
+
             Console.WriteLine("{0} valid words out of {1}", _wordList.Count, total);
 
             //Initialise search indices of word index
