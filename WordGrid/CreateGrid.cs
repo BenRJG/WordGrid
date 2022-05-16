@@ -61,60 +61,64 @@ namespace WordGrid
 
             //Initialise search indices of word index
             bool complete = false;
-            List<int> wordListIndex = new List<int>();
-            wordListIndex.Add(0);
 
             Console.WriteLine("Starting grid generation...");
             Stopwatch sw = new Stopwatch();
             sw.Start();
+
+            List<List<string>> wordLists = new List<List<string>>();
+            wordLists.Add(new List<string>(_wordList));
             while (!complete)
             {
-                if (wordListIndex[wordListIndex.Count - 1] >= _wordList.Count)
+                if (wordLists[wordLists.Count - 1].Count != 0)
                 {
-                    if(wordListIndex.Count == 1)
+                    _wordGrid.Add(wordLists[wordLists.Count - 1][0]);
+                    if(_wordGrid[0] == "rose")
+                    {
+
+                    }
+
+                    wordLists[wordLists.Count - 1].RemoveAt(0);
+                    if (_wordGrid.Count < _gridSize)
+                    {
+                        //Create new word list with only valid letters from previously selected word
+                        string debug1 = _wordGrid[0];
+                        char debug2 = debug1[_wordGrid.Count];
+                        wordLists.Add(_wordList.Where(x => x[0] == debug2).ToList());
+                        for (int i = 1; i < _wordGrid.Count; i++)
+                        {
+                            debug1 = _wordGrid[i];
+                            debug2 = debug1[_wordGrid.Count];
+                            wordLists[wordLists.Count - 1] = wordLists[wordLists.Count - 1].Where(x => x[i] == debug2).ToList();
+                        }
+                    }
+                    else
+                    {
+                        //Get character list from characters in valid grid
+                        string compare = string.Join(string.Empty, _wordGrid);
+                        List<char> chars = compare.ToList();
+                        chars.Sort();
+                        compare = new string(chars.ToArray());
+
+                        //See if grid has valid characters
+                        if (compare == _characters)
+                        {
+                            complete = true;
+                        }
+                        else
+                        {
+                            _wordGrid.RemoveAt(_wordGrid.Count - 1);
+                        }
+                    }
+                }
+                else
+                {
+                    if (wordLists.Count == 1)
                     {
                         throw new GridNotFoundException("No valid word grid found for provided characters");
                     }
                     _wordGrid.RemoveAt(_wordGrid.Count - 1);
-                    wordListIndex.RemoveAt(wordListIndex.Count - 1);
-                    wordListIndex[wordListIndex.Count - 1] += 1;
-                }
-                else if (CheckValid(_wordList[wordListIndex[wordListIndex.Count - 1]]))
-                {
-                    _wordGrid.Add(_wordList[wordListIndex[wordListIndex.Count - 1]]);
-                    wordListIndex.Add(0);
-                }
-                else
-                {
-                    wordListIndex[wordListIndex.Count - 1] += 1;
-                }
-
-                if (wordListIndex.Count > _gridSize)
-                {
-                    wordListIndex.RemoveAt(wordListIndex.Count - 1);
-
-                    //Get character list from characters in valid grid
-                    string compare = string.Join(string.Empty,_wordGrid);
-                    List<char> chars = compare.ToList();
-                    chars.Sort();
-                    compare = new string(chars.ToArray());
-
-                    //See if grid has valid characters
-                    if (compare == _characters)
-                    {
-                        complete = true;
-                    }
-                    else
-                    {
-                        _wordGrid.RemoveAt(_wordGrid.Count - 1);
-
-                        if (wordListIndex[wordListIndex.Count - 1] >= _wordList.Count)
-                        {
-                            _wordGrid.RemoveAt(_wordGrid.Count - 1);
-                            wordListIndex.RemoveAt(wordListIndex.Count - 1);
-                        }
-                        wordListIndex[wordListIndex.Count - 1] += 1;
-                    }
+                    wordLists.RemoveAt(wordLists.Count - 1);
                 }
             }
             sw.Stop();
