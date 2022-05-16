@@ -11,7 +11,7 @@ namespace WordGrid
     class CreateGrid
     {
         #region Variables
-        private static string FILEPATH = "https://norvig.com/ngrams/enabl";
+        private static string FILEPATH = "https://norvig.com/ngrams/enable1.txt";
 
         private int _gridSize;
         private string _characters;
