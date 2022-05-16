@@ -11,7 +11,7 @@ namespace WordGrid
     class CreateGrid
     {
         #region Variables
-        private static string FILEPATH = "https://norvig.com/ngrams/enable1.txt";
+        private static string FILEPATH = "https://norvig.com/ngrams/enabl";
 
         private int _gridSize;
         private string _characters;
@@ -35,29 +35,7 @@ namespace WordGrid
         {
             Console.ForegroundColor = ConsoleColor.DarkYellow;
 
-            //Extract valid words from word list
-            Console.WriteLine("Extracting valid words from {0}", FILEPATH);
-            int total = 0;
-            WebClient client = new WebClient();
-            StreamReader reader = new StreamReader(client.OpenRead(FILEPATH));
-
-            string readerLine;
-            readerLine = reader.ReadLine();
-
-            while (readerLine != null)
-            {
-                if (readerLine.Length == _gridSize)
-                {
-                    if (IsValid(readerLine, _characters))
-                    {
-                        _wordList.Add(readerLine);
-                    }
-                }
-                total++;
-                readerLine = reader.ReadLine();
-            }
-
-            Console.WriteLine("{0} valid words out of {1}", _wordList.Count, total);
+            GetWordList(FILEPATH);
 
             //Initialise search indices of word index
             bool complete = false;
@@ -73,23 +51,15 @@ namespace WordGrid
                 if (wordLists[wordLists.Count - 1].Count != 0)
                 {
                     _wordGrid.Add(wordLists[wordLists.Count - 1][0]);
-                    if(_wordGrid[0] == "rose")
-                    {
-
-                    }
-
                     wordLists[wordLists.Count - 1].RemoveAt(0);
+
                     if (_wordGrid.Count < _gridSize)
                     {
                         //Create new word list with only valid letters from previously selected word
-                        string debug1 = _wordGrid[0];
-                        char debug2 = debug1[_wordGrid.Count];
-                        wordLists.Add(_wordList.Where(x => x[0] == debug2).ToList());
+                        wordLists.Add(_wordList.Where(x => x[0] == _wordGrid[0][_wordGrid.Count]).ToList());
                         for (int i = 1; i < _wordGrid.Count; i++)
                         {
-                            debug1 = _wordGrid[i];
-                            debug2 = debug1[_wordGrid.Count];
-                            wordLists[wordLists.Count - 1] = wordLists[wordLists.Count - 1].Where(x => x[i] == debug2).ToList();
+                            wordLists[wordLists.Count - 1] = wordLists[wordLists.Count - 1].Where(x => x[i] == _wordGrid[i][_wordGrid.Count]).ToList();
                         }
                     }
                     else
@@ -124,6 +94,7 @@ namespace WordGrid
             sw.Stop();
             _timeCompleted = sw.Elapsed;
             Console.WriteLine("Grid Generation Completed");
+
             Console.ForegroundColor = ConsoleColor.White;
         }
 
@@ -139,16 +110,38 @@ namespace WordGrid
         #endregion
 
         #region private members
-        private bool CheckValid(string word)
+        private void GetWordList(string url)
         {
-            for(int i = 0; i < _wordGrid.Count; i++)
+            try
             {
-                if(!(_wordGrid[i][_wordGrid.Count] == word[i]))
+                //Extract valid words from word list
+                Console.WriteLine("Extracting valid words from {0}", url);
+                int total = 0;
+                WebClient client = new WebClient();
+                Stream inputStream = client.OpenRead(url);
+                StreamReader streamReader = new StreamReader(inputStream);
+                string readerLine;
+                readerLine = streamReader.ReadLine();
+
+                while (readerLine != null)
                 {
-                    return false;
+                    if (readerLine.Length == _gridSize)
+                    {
+                        if (IsValid(readerLine, _characters))
+                        {
+                            _wordList.Add(readerLine);
+                        }
+                    }
+                    total++;
+                    readerLine = streamReader.ReadLine();
                 }
+                inputStream.Close();
+                Console.WriteLine("{0} valid words out of {1}", _wordList.Count, total);
             }
-            return true;
+            catch(WebException webEx)
+            {
+                throw new GridNotFoundException("Word list unavailable");
+            }
         }
 
         private bool IsValid(string word, string check)
