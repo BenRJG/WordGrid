@@ -1,8 +1,17 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp3.1</TargetFramework>
+    <ApplicationIcon>Icon.ico</ApplicationIcon>
+    <Authors>Ben Gordon</Authors>
+    <Company />
+    <Product>Word Grid</Product>
+    <Description>This program takes a given grid size and character list and converts it (if possible) into a valid word grid</Description>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <OutputPath></OutputPath>
   </PropertyGroup>
 
 </Project>
